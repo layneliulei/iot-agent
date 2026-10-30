@@ -8,6 +8,8 @@
 执行指令
 ``` 
  python .\scratch\hello_llm.py 
+
+ uvicorn app.main:app --reload
 ```
 
 # 怎么测
