@@ -11,6 +11,7 @@ llm = ChatOpenAI(
     model="deepseek-chat",
     base_url=os.environ["OPENAI_BASE_URL"],
     api_key=SecretStr(os.environ["OPENAI_API_KEY"]),
+    # temperature=0,
 )
 
 
