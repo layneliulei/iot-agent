@@ -62,7 +62,20 @@ def divide(a: int, b: int) -> float:
     return a / b
 
 
-tools = [add, multiply, divide]
+@tool
+def get_device_status(device_id: str) -> str:
+    """查询设备的当前状态（在线状态，SOC/电量百分比/温度/最近上报时间）。
+    Args:
+        device_id:设备编号，例如 DEV-001 或DEV-002
+    """
+    fake = {
+        "DEV-001": "在线|SOC 87%|温度 31C |最近上报 2026-11-11 10：12",
+        "DEV-002": "离线|最近上报 2026-11-11 10：12",
+    }
+    return fake.get(device_id, f"未找到设备{device_id}")
+
+
+tools = [add, multiply, divide, get_device_status]
 tools_by_name = {t.name: t for t in tools}
 model_with_tools = model.bind_tools(tools)
 
@@ -132,8 +145,17 @@ agent = agent_builder.compile()
 
 # ------执行-------
 if __name__ == "__main__":
-    out = agent.invoke(
-        {"messages": [HumanMessage(content="Add 3 and 4.")], "llm_calls": 0}
-    )
-    for m in out["messages"]:
-        m.pretty_print()
+    # 执行 1
+    # out = agent.invoke(
+    #     {"messages": [HumanMessage(content="Add 3 and 4.")], "llm_calls": 0}
+    # )
+    # for m in out["messages"]:
+    #     m.pretty_print()
+
+    # 执行2
+    for q in ["DEV-001 现在状态如何？", "你好，你能做什么？"]:
+        print("=" * 20, q)
+        out = agent.invoke({"messages": [HumanMessage(content=q)], "llm_calls": 0})
+        for m in out["messages"]:
+            m.pretty_print()
+        print("llm_calls=", out["llm_calls"])
