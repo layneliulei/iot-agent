@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, llm
 
 client = TestClient(app)
 
@@ -16,3 +16,8 @@ def test_chat_rejects_empty():
     assert r.status_code == 422
     detail = r.json()["detail"]
     assert detail[0]["type"] == "string_too_short"
+
+
+async def test_ainvoke():
+    msg = await llm.ainvoke("只回复两个字：收到")
+    assert msg.content

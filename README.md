@@ -1,19 +1,15 @@
-# IOT AGENT
-物联网智能体
+# iot-agent
 
-# 做什么
-结合llm实现一个物联网场景的智能体。
+AI Agent 应用练习项目：FastAPI 服务 + 工具调用 + RAG 检索。
 
-# 怎么起
-执行指令
-``` 
- python .\scratch\hello_llm.py 
+## 跑起来
+python -m pytest -q          # 3 passed
+uvicorn app.main:app --reload
 
- uvicorn app.main:app --reload
-```
+## 容器
+docker build -t iot-agent .
+docker run -p 8000:8000 --env-file .env iot-agent
+curl.exe http://127.0.0.1:8000/health
 
-# 怎么测
-暂未定义
-
-# 下一步
-暂未定义
+## 下一步
+LangGraph 状态图 / 工具工程化 / RAG + 评测
