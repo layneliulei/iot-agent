@@ -2,7 +2,7 @@
 
 import operator
 import os
-from typing import Annotated
+from typing import Annotated, NotRequired
 
 from dotenv import load_dotenv
 from langchain.messages import (
@@ -12,7 +12,9 @@ from langchain.messages import (
     ToolMessage,
 )
 from langchain.tools import tool
+from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from pydantic import SecretStr
 from typing_extensions import TypedDict
@@ -85,7 +87,7 @@ model_with_tools = model.bind_tools(tools)
 
 class MessagesState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]  # reducer:追加，不覆盖
-    llm_calls: int  # 无reducer 覆盖
+    llm_calls: NotRequired[int]  # 无reducer 覆盖
 
 
 # ---------节点-----------
@@ -141,7 +143,7 @@ agent_builder.add_node("tool_node", tool_node)
 agent_builder.add_edge(START, "llm_call")
 agent_builder.add_conditional_edges("llm_call", should_continue, ["tool_node", END])
 agent_builder.add_edge("tool_node", "llm_call")
-agent = agent_builder.compile()
+agent = agent_builder.compile(checkpointer=InMemorySaver())
 
 # ------执行-------
 if __name__ == "__main__":
@@ -153,9 +155,31 @@ if __name__ == "__main__":
     #     m.pretty_print()
 
     # 执行2
-    for q in ["DEV-001 现在状态如何？", "你好，你能做什么？"]:
-        print("=" * 20, q)
-        out = agent.invoke({"messages": [HumanMessage(content=q)], "llm_calls": 0})
-        for m in out["messages"]:
-            m.pretty_print()
-        print("llm_calls=", out["llm_calls"])
+    # for q in ["DEV-001 现在状态如何？", "你好，你能做什么？"]:
+    #     print("=" * 20, q)
+    #     out = agent.invoke({"messages": [HumanMessage(content=q)], "llm_calls": 0})
+    #     for m in out["messages"]:
+    #         m.pretty_print()
+    #     print("llm_calls=", out["llm_calls"])
+
+    # 执行3 增加memory
+    def run(thread_id, questions):
+        config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
+        for q in questions:
+            out = agent.invoke({"messages": [HumanMessage(content=q)]}, config)
+            print("=" * 20, f"[{thread_id}]", q)
+            out["messages"][-1].pretty_print()
+            print(
+                "llm_calls = ", out["llm_calls"], "| messages = ", len(out["messages"])
+            )
+
+    run(
+        "u1",
+        [
+            "我叫Layne,正在做一个智能设备管理Agent.",
+            "DEV-001 现在状态如何？",
+            "我刚才说我叫什么？在做什么项目？",
+        ],
+    )
+
+    run("u2", ["我叫什么？"])
