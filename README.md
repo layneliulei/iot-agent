@@ -12,7 +12,37 @@ docker run -p 8000:8000 --env-file .env iot-agent
 curl.exe http://127.0.0.1:8000/health
 
 ## Agent 状态图
-python -m app.graph          # 计算器工具 + 设备状态工具（mock）
+## Agent 架构图
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+        __start__([<p>__start__</p>]):::first
+        llm_call(llm_call)
+        tool_node(tool_node)
+        __end__([<p>__end__</p>]):::last
+        __start__ --> llm_call;
+        llm_call -.-> __end__;
+        llm_call -.-> tool_node;
+        tool_node --> llm_call;
+        classDef default fill:#f2f0ff,line-height:1.2
+        classDef first fill-opacity:0
+        classDef last fill:#bfb6fc
+```
+
+- `llm_call -.-> tool_node`：上一条消息带 `tool_calls` 时去执行工具
+- `llm_call -.-> __end__`：没有 `tool_calls` 就收口结束
+- `tool_node --> llm_call`：工具结果回到模型，可再来一轮 —— **这个环就是 agent**
+
+
+python -m app.graph          # 三轮记忆演示
+
+python -m app.recursion_probe # 熔断探针（预期 GraphRecursionError）
+
 ## 图结构：START → llm_call →(条件边)→ tool_node → llm_call → END
 
 ## 下一步

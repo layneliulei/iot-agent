@@ -185,9 +185,18 @@ if __name__ == "__main__":
     run("u2", ["我叫什么？"])
 
     # 读取快照数据
-    snap = agent.get_state({"configurable": {"thread_id": "u1"}})
-    print("keys      =", list(snap.values.keys()))
-    print("messages  =", list(snap.values["messages"]))
-    print("llm_calls =", snap.values["llm_calls"])
-    print("next      =", snap.next)
-    print("meta      =", snap.metadata)
+    # snap = agent.get_state({"configurable": {"thread_id": "u1"}})
+    # print("keys      =", list(snap.values.keys()))
+    # print("messages  =", list(snap.values["messages"]))
+    # print("llm_calls =", snap.values["llm_calls"])
+    # print("next      =", snap.next)
+    # print("meta      =", snap.metadata)
+
+    # 执行4 熔断测试
+    # try:
+    #     agent.invoke(
+    #         {"messages": [HumanMessage(content="DEV-999 现在状态如何?连续查5次")]},
+    #         {"configurable": {"thread_id": "u3"}, "recursion_limit": 3},
+    #     )
+    # except Exception as e:
+    #     print(type(e).__name__, "->", e)
