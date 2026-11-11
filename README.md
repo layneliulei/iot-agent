@@ -12,6 +12,8 @@ docker run -p 8000:8000 --env-file .env iot-agent
 curl.exe http://127.0.0.1:8000/health
 
 ## Agent 状态图
+### 图结构：START → llm_call →(条件边)→ tool_node → llm_call → END
+
 ## Agent 架构图
 
 ```mermaid
@@ -43,7 +45,7 @@ python -m app.graph          # 三轮记忆演示
 
 python -m app.recursion_probe # 熔断探针（预期 GraphRecursionError）
 
-## 图结构：START → llm_call →(条件边)→ tool_node → llm_call → END
+
 
 ## 下一步
 LangGraph 状态图 / 工具工程化 / RAG + 评测
