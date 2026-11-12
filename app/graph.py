@@ -1,5 +1,6 @@
 """LangGraph 状态图：计算器 agent(S1 D1,抄自官方 quickstart 2026-11-10版)。"""
 
+import asyncio
 import operator
 import os
 from typing import Annotated, NotRequired
@@ -82,6 +83,36 @@ tools_by_name = {t.name: t for t in tools}
 model_with_tools = model.bind_tools(tools)
 
 
+async def run_tool_safely(tool, tool_call, timeout_s: float = 3.0) -> ToolMessage:
+    """任何工具都从这里进:超时不崩,异常不崩,错误信息回灌给模型.
+
+    重试规则(Day 2实现,先按这个口径写):
+    - 只对[可重试错误]重试:超时,连接失败,5XX;最多2次,退避0.5s/1s.
+    - 写操作(建工单,下单,扣款)不盲重试,必须带幂等键---模型重复调用同一个工具是常态,不是异常.
+    - 4xx(参数错,越权)不重试,重试一万次也是同样结果.
+    """
+    try:
+        async with asyncio.timeout(timeout_s):
+            out = await tool.ainvoke(tool_call["args"])
+        return ToolMessage(content=str(out), tool_call_id=tool_call["id"])
+    except TimeoutError:
+        return ToolMessage(
+            content=(
+                f"工具{tool.name}超过{timeout_s}s 未返回."
+                f"请告知用户稍后重试,或改用其他方式获取信息,不要编造结果."
+            ),
+            tool_call_id=tool_call["id"],
+        )
+    except Exception as e:
+        return ToolMessage(
+            content=(
+                f"工具{tool.name}执行失败({type(e).__name__})."
+                f"请向用户说明信息暂时不可用,不要编造结果."
+            ),
+            tool_call_id=tool_call["id"],
+        )
+
+
 # ----------状态--------------
 
 
@@ -113,7 +144,7 @@ def llm_call(state: MessagesState):
     }
 
 
-def tool_node(state: MessagesState):
+async def tool_node(state: MessagesState):
     """执行模型要求的工具调用，把结果包成 ToolMessage 还回去。"""
     # last = state["messages"][-1]
     # if not isinstance(last, AIMessage):
@@ -122,11 +153,11 @@ def tool_node(state: MessagesState):
     result = []
     for tool_call in tool_calls:
         t = tools_by_name[tool_call["name"]]
-        observation = t.invoke(tool_call["args"])
-
-        result.append(
-            ToolMessage(content=str(observation), tool_call_id=tool_call["id"])
-        )
+        # observation = t.invoke(tool_call["args"])
+        # result.append(
+        #     ToolMessage(content=str(observation), tool_call_id=tool_call["id"])
+        # )
+        result.append(await run_tool_safely(t, tool_call, timeout_s=3.0))
     return {"messages": result}
 
 
@@ -147,6 +178,8 @@ agent = agent_builder.compile(checkpointer=InMemorySaver())
 
 # ------执行-------
 if __name__ == "__main__":
+    import asyncio
+
     # 执行 1
     # out = agent.invoke(
     #     {"messages": [HumanMessage(content="Add 3 and 4.")], "llm_calls": 0}
@@ -163,26 +196,29 @@ if __name__ == "__main__":
     #     print("llm_calls=", out["llm_calls"])
 
     # 执行3 增加memory
-    def run(thread_id, questions):
+    async def run(thread_id, questions):
         config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
         for q in questions:
-            out = agent.invoke({"messages": [HumanMessage(content=q)]}, config)
+            out = await agent.ainvoke({"messages": [HumanMessage(content=q)]}, config)
             print("=" * 20, f"[{thread_id}]", q)
             out["messages"][-1].pretty_print()
             print(
                 "llm_calls = ", out["llm_calls"], "| messages = ", len(out["messages"])
             )
 
-    run(
-        "u1",
-        [
-            "我叫Layne,正在做一个智能设备管理Agent.",
-            "DEV-001 现在状态如何？",
-            "我刚才说我叫什么？在做什么项目？",
-        ],
-    )
+    async def main() -> None:
+        await run(
+            "u1",
+            [
+                "我叫Layne,正在做一个智能设备管理Agent.",
+                "DEV-001 现在状态如何？",
+                "我刚才说我叫什么？在做什么项目？",
+            ],
+        )
 
-    run("u2", ["我叫什么？"])
+        await run("u2", ["我叫什么？"])
+
+    asyncio.run(main())
 
     # 读取快照数据
     # snap = agent.get_state({"configurable": {"thread_id": "u1"}})
