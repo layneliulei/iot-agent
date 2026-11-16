@@ -118,7 +118,7 @@ def _audit(event: str, **kw) -> None:
 
 
 def authorize(tool_name: str, args: dict, tenant_id: str | None) -> str | None:
-    """返回None =放行;返回空字符串=拒绝原因(直接回灌给模型,不抛异常)."""
+    """返回 None = 放行;返回非空字符串 = 拒绝原因(直接回灌给模型,不抛异常)."""
     field = _SCOPED.get(tool_name)
     if field is None:
         return None
