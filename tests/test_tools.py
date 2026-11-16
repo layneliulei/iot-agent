@@ -20,7 +20,7 @@ def boom_tool() -> str:
 
 
 def _call(name: str, call_id: str = "call_1") -> dict:
-    return {"name": name, "args": {}, "id": call_id, "type": "toll_call"}
+    return {"name": name, "args": {}, "id": call_id, "type": "tool_call"}
 
 
 async def test_tool_timeout():

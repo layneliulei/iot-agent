@@ -233,6 +233,7 @@ async def tool_node(state: MessagesState):
         if name in _NEEDS_OWNER:
             args["tenant_id"] = tenant_id
 
+        tool_call = {**tool_call, "args": args}
         msg = await run_tool_safely(t, tool_call, timeout_s=3.0, tenant_id=tenant_id)
 
         # observation = t.invoke(tool_call["args"])

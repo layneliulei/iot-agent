@@ -9,7 +9,7 @@ from qdrant_client.models import Distance, PointStruct, VectorParams
 
 CORPUS = Path("docs/manuals")
 DIM = 512
-Q_PREFIX = "为这个句子生成表示已用于检索相关文章:"
+Q_PREFIX = "为这个句子生成表示以用于检索相关文章:"
 
 STRATEGIES = {
     "naive": dict(chunk_size=500, chunk_overlap=0),
@@ -102,7 +102,7 @@ def probe(client: QdrantClient, enc, name: str, q: str, limit: int = 3) -> None:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--encoder", choices=["st", "fast"], default="st")
+    ap.add_argument("--encoder", choices=["st"], default="st")
     ap.add_argument("--probe", action="store_true")
     args = ap.parse_args()
 
