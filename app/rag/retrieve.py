@@ -84,18 +84,27 @@ def _kw_rerank(
     return scored[:top_k]
 
 
-def rerank(question: str, candidates: list[dict], top_k: int = RERANK_K) -> list[dict]:
-    """精排。分数只用于排序与阈值校准，不要当概率写进 README。"""
+def rerank(
+    question: str,
+    candidates: list[dict],
+    top_k: int = RERANK_K,
+    min_score: float | None = None,
+) -> list[dict]:
+    """精排。分数只用于排序与阈值校准，不要当概率写进 README。
+    min_score=None 用模块常量 MIN_RERANK；评测复核阈值时传 0.0 拿原始分数。
+    """
     if not candidates:
         return []
     if os.getenv("RERANK", "ce") == "kw":
         return _kw_rerank(question, candidates, top_k)
+    floor = MIN_RERANK if min_score is None else min_score
     scores = get_reranker().predict([(question, c["text"]) for c in candidates])
     ranked = sorted(
         ({**c, "rerank_score": float(s)} for c, s in zip(candidates, scores)),
         key=lambda c: c["rerank_score"],
         reverse=True,
     )
-    if MIN_RERANK > 0:
-        ranked = [d for d in ranked if d["rerank_score"] >= MIN_RERANK]
+
+    if floor > 0:
+        ranked = [d for d in ranked if d["rerank_score"] >= floor]
     return ranked[:top_k]

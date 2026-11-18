@@ -34,6 +34,7 @@ class RagState(TypedDict):
     candidates: NotRequired[list[dict]]
     docs: NotRequired[list[dict]]
     answer: NotRequired[str]
+    usage: NotRequired[dict]
 
 
 def retrieve_node(state: RagState):
@@ -58,7 +59,10 @@ def build_context(docs: list[dict]) -> str:
 async def generate_node(state: RagState):
     docs = state.get("docs") or []
     if not docs:
-        return {"answer": "材料中没有相关信息。"}
+        return {
+            "answer": "材料中没有相关信息。",
+            "usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+        }
     msg = await llm.ainvoke(
         [
             SystemMessage(content=SYSTEM),
@@ -67,7 +71,10 @@ async def generate_node(state: RagState):
             ),
         ]
     )
-    return {"answer": msg.text}
+    usage = getattr(msg, "usage_metadata", None) or {}
+    if not usage:  # 某些版本把用量放在 response_metadata.token_usage
+        usage = (getattr(msg, "response_metadata", None) or {}).get("token_usage") or {}
+    return {"answer": msg.text, "usage": dict(usage)}
 
 
 builder = StateGraph(RagState)
