@@ -3,7 +3,7 @@
 AI Agent 应用练习项目：FastAPI 服务 + 工具调用 + RAG 检索。
 
 ## 跑起来
-python -m pytest -q          # 10 passed  
+python -m pytest -q          # # 12 passed, 1 skipped
 uvicorn app.main:app --reload
 
 ## 容器
