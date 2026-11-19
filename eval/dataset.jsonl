@@ -1,0 +1,20 @@
+{"id": "P01", "q": "电池多久没有心跳会被标记为离线?", "gold_source": "battery-manual.md", "gold_kw": ["3 个上报周期", "90 秒"]}
+{"id": "P02", "q": "电池的低功耗上报间隔是多少?什么条件下才允许下发?", "gold_source": "battery-manual.md", "gold_kw": ["300 秒", "SOC 高于 20%"]}
+{"id": "P03", "q": "电池 E203 触发后,什么时候才允许恢复充电?", "gold_source": "battery-manual.md", "gold_kw": ["55℃", "10 分钟"]}
+{"id": "P04", "q": "电池固件升级必须同时满足哪些条件?", "gold_source": "battery-firmware.md", "gold_kw": ["SOC 不低于 30%", "网关在线"]}
+{"id": "P05", "q": "网关北向心跳连续失败几次算离线?", "gold_source": "gateway-manual.md", "gold_kw": ["3 次", "180 秒"]}
+{"id": "P06", "q": "网关本身离线时,下挂设备该怎么处理?", "gold_source": "gateway-manual.md", "gold_kw": ["上级离线"]}
+{"id": "P07", "q": "一台网关最多能挂多少个从站?", "gold_source": "gateway-topology.md", "gold_kw": ["32"]}
+{"id": "P08", "q": "电表连续多少个实时周期没有数据算离线?", "gold_source": "meter-manual.md", "gold_kw": ["5 个", "5 分钟"]}
+{"id": "P09", "q": "M410 是什么告警?阈值是多少?", "gold_source": "meter-manual.md", "gold_kw": ["时钟偏差", "30 秒"]}
+{"id": "P10", "q": "峰段是几点到几点,单价多少?", "gold_source": "meter-tariff.md", "gold_kw": ["10:00", "1.20"]}
+{"id": "P11", "q": "月结时点是什么时候?", "gold_source": "meter-tariff.md", "gold_kw": ["1 日 00:15"]}
+{"id": "P12", "q": "逆变器默认上报间隔和夜间待机间隔分别是多少?", "gold_source": "inverter-manual.md", "gold_kw": ["15 秒", "120 秒"]}
+{"id": "P13", "q": "逆变器的夜间待机在什么时段才允许?", "gold_source": "inverter-manual.md", "gold_kw": ["22:00", "06:00"]}
+{"id": "P14", "q": "逆变器安装时背面、左右、底部分别要留多少净距?", "gold_source": "inverter-install.md", "gold_kw": ["200mm", "300mm", "500mm"]}
+{"id": "P15", "q": "传感器缺湿度但温度还在上报,算离线吗?", "gold_source": "sensor-manual.md", "gold_kw": ["不算离线"]}
+{"id": "P16", "q": "S501 温度越限的触发阈值和清除条件是什么?", "gold_source": "sensor-alarm-codes.md", "gold_kw": ["45℃", "43℃"]}
+{"id": "P17", "q": "传感器的标定周期是多少天?更换探头后要不要重新标定?", "gold_source": "sensor-calibration.md", "gold_kw": ["180 天", "重新标定"]}
+{"id": "N01", "q": "这个设备的出厂价是多少?", "expect_refusal": true}
+{"id": "N02", "q": "电池的质保期是几年?", "expect_refusal": true}
+{"id": "N03", "q": "客户要求三天内上门,差旅费谁承担?", "expect_refusal": true}
