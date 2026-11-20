@@ -1,6 +1,7 @@
 """RAG 索引:语料 -> 切片 -> embedding -> Qdrant 入库"""
 
 import argparse
+import os
 from pathlib import Path
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -20,7 +21,8 @@ STRATEGIES = {
 
 
 def get_client() -> QdrantClient:
-    return QdrantClient(url="http://localhost:6333")
+    # return QdrantClient(url="http://localhost:6333")
+    return QdrantClient(url=os.getenv("QDRANT_URL", "http://localhost:6333"))
 
 
 class STEncoder:
