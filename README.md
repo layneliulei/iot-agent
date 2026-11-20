@@ -6,6 +6,16 @@ AI Agent 应用练习项目：FastAPI 服务 + 工具调用 + RAG 检索。
 python -m pytest -q          # # 12 passed, 1 skipped
 uvicorn app.main:app --reload
 
+## 运行（Docker）
+
+```bash
+docker build -t iot-agent:s4d1 .    # 首次约 60 分钟：pip 装 torch + sentence-transformers
+docker run -d -p 8000:8000 -e QDRANT_URL=http://host.docker.internal:6333 \
+  -v "%USERPROFILE%\.cache\huggingface:/root/.cache/huggingface" --env-file .env iot-agent:s4d1
+# POST /ask  {"q": "设备离线了怎么处理？"}
+```
+
+
 ## 容器
 docker build -t iot-agent .  
 docker run -p 8000:8000 --env-file .env iot-agent  
